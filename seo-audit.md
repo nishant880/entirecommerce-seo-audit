@@ -172,8 +172,12 @@ Output: topical-authority heat map, merge-or-expand list.
 - `[E+I]` Striking-distance queries (position 4 to 15, impressions 50+).
 - `[E+I]` High-impression low-CTR queries (position 1 to 10, CTR under 1%).
 - `[E]` Branded vs non-branded split: Ahrefs estimate, GSC confirmation when available.
+- `[E]` Industry keyword universe. After per-competitor gap CSVs are produced, union them into one deduped master dataset. Score each keyword: `opportunity = aggregate_volume × num_competitors_ranking × max(1, 101 - max_difficulty) × (1 if not brand_ranks else 0.3)`. The `(101 - max_difficulty)` factor keeps scores positive across DataForSEO's 0-100 KD scale. Classify intent (informational / commercial / transactional / navigational). Cluster by head-term semantic similarity (6 to 12 clusters). Output `industry-keyword-universe.csv`. This artefact replaces per-competitor CSVs as the primary keyword deliverable.
+- `[E]` Page-map. For every cluster, check whether the brand has an existing URL ranking for the cluster's head term. If yes and top-30, action is `expand`. If yes but below position 30, action is `rewrite`. If no, action is `build` (specify page type: pillar, comparison hub, FAQ, buying guide, category landing). Output `industry-clusters-page-map.md`.
+- `[E]` SERP-feature mining for the top 20 head-terms by opportunity score: Serper `/search` for PAA questions and related searches, Serper `/autocomplete` on `{head_term}`, `best {head_term}`, `how to {head_term}`. Collect into `serp-features-mined.csv`. Cluster the mined phrases, flag any phrase the brand's current content does not address as FAQ-block or H3-section candidates.
+- `[E]` On-page-signal fallback when DataForSEO, Ahrefs, and Serper are all unavailable: WebFetch the brand's and competitors' homepages, top 10 nav links, top 5 collection pages, top 5 PDPs, and blog index. Extract titles, metas, H1/H2, URL slugs, schema, anchor text. Produce `fallback-onpage-signals.csv` per domain. Run 4C.5 consolidation on this reduced dataset, labelled "on-page signals only, no ranking or volume data".
 
-Output: ranked opportunity list. Content-scoring rubric: Customer Impact 40%, Content-Market Fit 30%, Search Potential 20%, Resources 10%.
+Output: ranked opportunity list, industry keyword universe CSV, clusters page-map, SERP-features CSV. Content-scoring rubric: Customer Impact 40%, Content-Market Fit 30%, Search Potential 20%, Resources 10%.
 
 ## Step 9. Section 6. AEO and AI-SEO
 
@@ -184,8 +188,9 @@ Output: ranked opportunity list. Content-scoring rubric: Customer Impact 40%, Co
 - `[E]` AEO whitespace map: queries where the brand has zero presence but 2+ competitors are cited.
 - `[E]` Entity and topic clarity: homepage declares what the brand is in first 100 words, `Organization` schema with `sameAs` links, author pages with `Person` schema.
 - `[E]` Conversational-query and passage-ranking targeting: 10 most commercially valuable conversational queries, self-contained-answer check, direct-answer-snippet check.
+- `[E]` PAA-driven extractable-answer backlog. Read `serp-features-mined.csv` from Section 5. For every PAA question the brand's existing content does not already answer in a self-contained block, write an answer line for the content team: 50 to 75 words, plain-English, ready to paste into an FAQ block or H3 subhead. Prioritise by opportunity score of the parent head-term cluster.
 
-Output: AEO presence scorecard, whitespace map, ranked AEO content edit list.
+Output: AEO presence scorecard, whitespace map, ranked AEO content edit list, PAA answer backlog.
 
 ## Step 10. Section 7. Backlinks and domain authority
 
